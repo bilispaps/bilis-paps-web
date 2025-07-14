@@ -94,7 +94,7 @@ function calculatePrice() {
     const weight = hasBuyer ? parseFloat(document.getElementById('weight').value) : 0;
 
     const basePrice = 60;
-    const includedKm = 4;
+    const includedKm = 3;
     const perKm = 15;
     const buyerRate = 60;
     const maxWeight = 7;
