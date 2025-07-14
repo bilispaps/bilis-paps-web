@@ -3,6 +3,7 @@ body {
     max-width: 600px;
     margin: 0 auto;
     padding: 20px;
+    font-size: 12px;
 }
 .header {
     text-align: center;
@@ -54,6 +55,7 @@ button:hover {
 }
 .warning {
     color: red;
+    font-size: 10px;
 }
 #map {
     height: 300px;
