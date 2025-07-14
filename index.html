@@ -1,123 +1,49 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Bilis Paps Estimator Delivery Calculator</title>
-    <!-- Leaflet CSS -->
+    <link rel="stylesheet" type="text/css" href="style.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .logo-container {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 15px;
-        }
-        .logo {
-            max-height: 80px;
-            max-width: 100%;
-        }
-        .calculator {
-            border: 1px solid #ddd;
-            padding: 20px;
-            border-radius: 5px;
-        }
-        .result {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-        }
-        input, button, select {
-            padding: 8px;
-            margin: 5px 0;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        .checkbox-label {
-            display: flex;
-            align-items: center;
-            margin: 10px 0;
-        }
-        .checkbox-label input {
-            width: auto;
-            margin-right: 10px;
-        }
-        .warning {
-            color: red;
-        }
-        #map {
-            height: 300px;
-            width: 100%;
-            margin: 10px 0;
-            border-radius: 5px;
-        }
-        #distanceResult {
-            font-weight: bold;
-            margin: 5px 0;
-        }
-        .search-box {
-            background-color: #fff;
-            padding: 5px;
-            border-radius: 2px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-            margin: 10px;
-        }
-        .search-box input {
-            width: 250px;
-            padding: 8px;
-            border: 1px solid #ddd;
-        }
-    </style>
 </head>
 <body>
     <div class="header">
         <div class="logo-container">
-            
             <img src="https://i.ibb.co/9mZvzsqs/bilispaps.png" alt="Company Logo" class="logo">
         </div>
-        <h1>Bilis Paps Delivery Calculator</h1>
+        <h1>Bilis Paps Estimator Delivery Calculator</h1>
+        <p>Estimate deliveries and view status here.</p>
     </div>
 
     <div class="calculator">
-        <p>Starting from: <strong>San Antonio Public Market,</strong></p>
-        
+        <label><strong>Choose Starting Point:</strong></label>
+        <div class="checkbox-label">
+            <input type="checkbox" id="useMyLocation" checked>
+            <label for="useMyLocation">Use my current location</label>
+        </div>
+
+        <input type="text" id="startInput" placeholder="Or enter starting address manually">
+
         <div id="map"></div>
+
         <div class="search-box">
             <input type="text" id="destinationInput" placeholder="Enter destination address">
-            <button onclick="findRoute()">Calculate Route</button>
+            <button type="button" onclick="findRoute()">Calculate Route</button>
         </div>
         <div id="distanceResult">Enter destination to calculate distance</div>
-        
+
         <form onsubmit="calculatePrice(); return false;">
             <input type="hidden" id="distance" value="0">
-            
             <div class="checkbox-label">
                 <input type="checkbox" id="buyerService" onchange="toggleBuyerFields()">
-                <label for="buyerService">Add Personal Buyer Service (₱70/hour, max 7kg)</label>
+                <label for="buyerService">check this if Pabili or Personal Buyer, max 7kg)</label>
             </div>
 
             <div id="buyerFields" style="display: none;">
-                <label for="hours">Hours Needed:</label>
+                <label for="hours">Est. Hours Needed:</label>
                 <input type="number" id="hours" step="0.5" min="0.5" value="1">
-                
-                <label for="weight">Weight (kg):</label>
+
+                <label for="weight">Est. Weight of your Pabili(kg):</label>
                 <input type="number" id="weight" step="0.1" min="0.1" value="1">
                 <p class="warning" id="weightWarning" style="display: none;">⚠️ Exceeds 7kg limit! +₱10 per extra kg</p>
             </div>
@@ -133,151 +59,16 @@
         </div>
     </div>
 
-    <!-- Leaflet JS -->
+    <!-- Scripts -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- Leaflet Routing Machine -->
     <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
-    
-    <script>
-        const startPoint = [15.306238, 120.857294]; // San Antonio Public Market coordinates
-        let map;
-        let routeControl;
-        let distanceInKm = 0;
+    <script src="script.js"></script>
 
-        function initMap() {
-            map = L.map('map').setView(startPoint, 15);
-            
-            // OpenStreetMap tiles
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
-            
-            // Add start marker
-            L.marker(startPoint).addTo(map)
-                .bindPopup("San Antonio Public Market (Start Point)")
-                .openPopup();
-        }
 
-        function findRoute() {
-            const destination = document.getElementById('destinationInput').value;
-            if (!destination) return;
-            
-            // Clear previous route if exists
-            if (routeControl) {
-                map.removeControl(routeControl);
-            }
-            
-            // Use Nominatim for geocoding (free open-source)
-            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(destination)}&limit=1`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.length === 0) {
-                        alert("Destination not found");
-                        return;
-                    }
-                    
-                    const endPoint = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
-                    
-                    // Add destination marker
-                    L.marker(endPoint).addTo(map)
-                        .bindPopup("Destination")
-                        .openPopup();
-                    
-                    // Calculate route using OSRM
-                    routeControl = L.Routing.control({
-                        waypoints: [
-                            L.latLng(startPoint[0], startPoint[1]),
-                            L.latLng(endPoint[0], endPoint[1])
-                        ],
-                        routeWhileDragging: true,
-                        show: false,
-                        router: L.Routing.osrmv1({
-                            serviceUrl: 'https://router.project-osrm.org/route/v1'
-                        }),
-                        createMarker: function() { return null; } // Disable auto-markers
-                    }).addTo(map);
-                    
-                    routeControl.on('routesfound', function(e) {
-                        const routes = e.routes;
-                        distanceInKm = routes[0].summary.totalDistance / 1000;
-                        document.getElementById('distance').value = distanceInKm.toFixed(2);
-                        document.getElementById('distanceResult').textContent = 
-                            `Calculated Distance: ${distanceInKm.toFixed(2)} km`;
-                    });
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert("Error finding route. Please try again.");
-                });
-        }
-        
-        function toggleBuyerFields() {
-            const buyerFields = document.getElementById('buyerFields');
-            const buyerCheckbox = document.getElementById('buyerService');
-            buyerFields.style.display = buyerCheckbox.checked ? 'block' : 'none';
-        }
-
-        function calculatePrice() {
-            const distance = parseFloat(document.getElementById('distance').value);
-            const hasBuyerService = document.getElementById('buyerService').checked;
-            const hours = hasBuyerService ? parseFloat(document.getElementById('hours').value) : 0;
-            const weight = hasBuyerService ? parseFloat(document.getElementById('weight').value) : 0;
-
-            // Delivery Calculation
-            const basePrice = 70;
-            const includedKm = 5;
-            const pricePerKm = 10;
-            let additionalKm = 0;
-            let deliveryPrice = basePrice;
-
-            if (distance > includedKm) {
-                additionalKm = distance - includedKm;
-                deliveryPrice += additionalKm * pricePerKm;
-            }
-
-            // Buyer Service Calculation
-            const buyerRate = 70;
-            const maxWeight = 7;
-            const extraKgRate = 10;
-            let buyerPrice = hasBuyerService ? hours * buyerRate : 0;
-            let extraWeightCharge = 0;
-            let weightWarning = "";
-
-            if (hasBuyerService && weight > maxWeight) {
-                const extraKg = weight - maxWeight;
-                extraWeightCharge = extraKg * extraKgRate;
-                weightWarning = ` (+₱${extraKg}kg × ₱${extraKgRate} = ₱${extraWeightCharge})`;
-                document.getElementById('weightWarning').style.display = 'block';
-            } else {
-                document.getElementById('weightWarning').style.display = 'none';
-            }
-
-            const totalPrice = deliveryPrice + buyerPrice + extraWeightCharge;
-
-            // Display Results
-            document.getElementById('deliveryCost').innerHTML = `
-                <p><strong>Delivery Cost:</strong></p>
-                <p>Base Price (First ${includedKm} km): ₱${basePrice}</p>
-                <p>Distance: ${distance.toFixed(2)} km</p>
-                ${additionalKm > 0 ? `<p>+ Additional ${additionalKm.toFixed(2)} km × ₱${pricePerKm} = ₱${(additionalKm * pricePerKm).toFixed(2)}</p>` : ''}
-            `;
-
-            if (hasBuyerService) {
-                document.getElementById('buyerServiceDetails').innerHTML = `
-                    <p><strong>Buyer Service:</strong></p>
-                    <p>${hours} hour(s) × ₱${buyerRate} = ₱${buyerPrice.toFixed(2)}</p>
-                    <p>Weight: ${weight} kg (Max ${maxWeight}kg) ${weightWarning}</p>
-                `;
-            } else {
-                document.getElementById('buyerServiceDetails').innerHTML = '';
-            }
-
-            document.getElementById('totalPrice').innerHTML = `Total Price: ₱${totalPrice.toFixed(2)}`;
-            document.getElementById('result').style.display = 'block';
-        }
-
-        // Initialize the map when page loads
-        window.onload = initMap;
-    </script>
+     <footer>
+    <p><strong>Disclaimer:</strong> All information provided in this application is for general guidance only. We do not guarantee the accuracy or completeness of any data presented. Use at your own discretion.</p>
+    <p>&copy; 2025 Bilis Paps Delivery Services. All rights reserved.</p>
+    <p>&copy;  Gatuz Web Dev Inc</p>
+  </footer> 
 </body>
 </html>
