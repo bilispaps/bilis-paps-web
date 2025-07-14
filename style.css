@@ -1,0 +1,90 @@
+body {
+    font-family: Arial, sans-serif;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+.header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.logo-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+.logo {
+    max-height: 80px;
+    max-width: 100%;
+}
+.calculator {
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 5px;
+}
+.result {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}
+input, button, select {
+    padding: 8px;
+    margin: 5px 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+button:hover {
+    background-color: #45a049;
+}
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+}
+.checkbox-label input {
+    width: auto;
+    margin-right: 10px;
+}
+.warning {
+    color: red;
+}
+#map {
+    height: 300px;
+    width: 100%;
+    margin: 10px 0;
+    border-radius: 5px;
+}
+#distanceResult {
+    font-weight: bold;
+    margin: 5px 0;
+}
+.search-box {
+    background-color: #fff;
+    padding: 5px;
+    border-radius: 2px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    margin: 10px;
+}
+.search-box input {
+    width: 250px;
+    padding: 8px;
+    border: 1px solid #ddd;
+}
+footer {
+    text-align: center;
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #f1f1f1;
+    border-radius: 5px;
+}
+footer p {
+    margin: 5px 0;
+    font-size: 14px;
+}
